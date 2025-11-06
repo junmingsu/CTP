@@ -506,10 +506,143 @@
       font-size: 14px;
       color: #2C3E50;
     }
+  
+  /* ⭐ 新增：通關密碼頁面樣式 */
+    .access-guard {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+
+    .access-container {
+      background: white;
+      padding: 50px 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .access-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    .access-title {
+      color: #2C3E50;
+      font-size: 28px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .access-subtitle {
+      color: #7f8c8d;
+      font-size: 15px;
+      margin-bottom: 30px;
+    }
+
+    .access-input {
+      width: 100%;
+      padding: 15px 20px;
+      font-size: 16px;
+      border: 2px solid #ecf0f1;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-family: inherit;
+      transition: all 0.3s;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    .access-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .access-btn {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .access-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .access-btn:active {
+      transform: translateY(0);
+    }
+
+    .access-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .access-error {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 15px;
+      min-height: 20px;
+      font-weight: 500;
+    }
   </style>
+  
 </head>
 <body>
-  <div class="container">
+  <!-- ⭐ 新增：通關密碼輸入頁面 -->
+  <div class="access-guard" id="accessGuard">
+    <div class="access-container">
+      <div class="access-icon">🔐</div>
+      <h1 class="access-title">系統通關驗證</h1>
+      <p class="access-subtitle">請輸入通關密碼以使用本系統</p>
+      <form id="accessForm" onsubmit="verifyAccessPassword(event)">
+        <input 
+          type="password" 
+          id="accessPasswordInput" 
+          class="access-input" 
+          placeholder="請輸入通關密碼"
+          required
+          autocomplete="off"
+        >
+        <button type="submit" class="access-btn" id="accessBtn">
+          🔓 進入系統
+        </button>
+      </form>
+      <div id="accessError" class="access-error"></div>
+    </div>
+  </div>
+  <!-- ⭐ 通關密碼頁面結束 -->
+
+  <div class="container" id="mainContainer" style="display: none;">
     <div class="header">
       <h1>📚 學生分組專題登記與查詢系統</h1>
       <p>Student Project Registration & Query System</p>
@@ -726,7 +859,57 @@
     let allProjects = [];
     let currentEditProjectId = null;
 
-    // ⭐ 修正後的 API 呼叫函數
+        // ⭐ 新增：通關密碼驗證功能
+    // 檢查是否已經驗證過
+    window.addEventListener('DOMContentLoaded', function() {
+      const isAuthenticated = sessionStorage.getItem('systemAuthenticated');
+      if (isAuthenticated === 'true') {
+        showMainSystem();
+      }
+    });
+
+    async function verifyAccessPassword(event) {
+      event.preventDefault();
+      
+      const passwordInput = document.getElementById('accessPasswordInput');
+      const errorDiv = document.getElementById('accessError');
+      const btn = document.getElementById('accessBtn');
+      
+      const password = passwordInput.value;
+      
+      btn.disabled = true;
+      btn.textContent = '🔄 驗證中...';
+      errorDiv.textContent = '';
+      
+      const result = await callAPI('verifyAccessPassword', { password });
+      
+      if (result.success) {
+        sessionStorage.setItem('systemAuthenticated', 'true');
+        errorDiv.style.color = '#27ae60';
+        errorDiv.textContent = '✅ 驗證成功！正在進入系統...';
+        
+        setTimeout(() => {
+          showMainSystem();
+        }, 800);
+      } else {
+        btn.disabled = false;
+        btn.textContent = '🔓 進入系統';
+        errorDiv.style.color = '#e74c3c';
+        errorDiv.textContent = result.message;
+        passwordInput.value = '';
+        passwordInput.focus();
+      }
+    }
+
+    function showMainSystem() {
+      document.getElementById('accessGuard').style.display = 'none';
+      document.getElementById('mainContainer').style.display = 'block';
+    }
+    // ⭐ 通關密碼功能結束
+	
+	
+	
+	// ⭐ 修正後的 API 呼叫函數
     async function callAPI(action, additionalData = {}) {
       try {
         // ⭐ 將 action 和所有資料都放在 POST body 中
