@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專題報告順序</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        /* 未登記學生區域 */
+        .unregistered-section {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 10px 30px rgba(255,107,107,0.4);
+            }
+            50% {
+                box-shadow: 0 10px 40px rgba(255,107,107,0.6);
+            }
+        }
+
+        .unregistered-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            color: white;
+        }
+
+        .unregistered-header h2 {
+            font-size: 2em;
+            margin: 0 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .unregistered-header::before,
+        .unregistered-header::after {
+            content: "⚠️";
+            font-size: 2em;
+        }
+
+        .unregistered-notice {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .unregistered-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .unregistered-item {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .unregistered-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+
+        .student-name {
+            font-weight: 600;
+            color: #d63031;
+            font-size: 1.1em;
+        }
+
+        .student-id {
+            color: #666;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+
+        /* 統計資訊 */
+        .stats {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        /* 專題卡片 */
+        .section-title {
+            text-align: center;
+            color: white;
+            font-size: 2em;
+            margin: 50px 0 30px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 20px 0;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .order-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .project-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            padding-right: 70px;
+            font-weight: 600;
+        }
+
+        .project-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .members-section {
+            margin-top: 20px;
+        }
+
+        .members-title {
+            font-size: 1.1em;
+            color: #667eea;
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .members-title::before {
+            content: "👥";
+            margin-right: 8px;
+        }
+
+        .member-item {
+            background: #f0f4ff;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+
+        .member-item:hover {
+            background: #e0e8ff;
+        }
+
+        .member-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .member-id {
+            color: #666;
+            font-size: 0.9em;
+            font-family: 'Courier New', monospace;
+        }
+
+        @media (max-width: 768px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .unregistered-header h2 {
+                font-size: 1.5em;
+            }
+
+            .unregistered-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 50px;
+            padding: 20px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 專題報告順序</h1>
+            <p>隨機分配 · 公平公正</p>
+        </div>
+
+        <!-- 未登記學生警示區 -->
+        <div class="unregistered-section">
+            <div class="unregistered-header">
+                <h2>尚未登記專題的學生</h2>
+            </div>
+            <div class="unregistered-notice">
+                以下 <strong>學生</strong> 尚未登記專題，請趕緊提供分組資料(加入2人組或組新組)！
+            </div>
+            <div class="unregistered-list">
+                <div class="unregistered-item">
+                    <span class="student-name">陳政宏</span>
+                    <span class="student-id">S11455001</span>
+                </div>
+                <div class="unregistered-item">
+                    <span class="student-name">陳姿燕</span>
+                    <span class="student-id">S11455024</span>
+                </div>
+                <div class="unregistered-item">
+                    <span class="student-name">李瑋勳</span>
+                    <span class="student-id">S11455033</span>
+                </div>
+                <div class="unregistered-item">
+                    <span class="student-name">王禾翔</span>
+                    <span class="student-id">S11455036</span>
+                </div>
+                <div class="unregistered-item">
+                    <span class="student-name">葉禹呈</span>
+                    <span class="student-id">S11455040</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats">
+            📊 共有 <strong>18</strong> 個專題組別 · <strong>48</strong> 位學生已登記
+        </div>
+
+        <!-- 專題報告順序區 -->
+        <div class="section-title">📋 專題報告順序</div>
+        
+        <div class="cards-grid">
+            <div class="project-card">
+                <div class="order-badge">1</div>
+                <div class="project-title">自訂</div>
+                <div class="project-description">操控角色進行闖關，多人遊玩時有機會遇到彩蛋，關卡不多但玩法多樣。</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">黃新詠</span>
+                        <span class="member-id">S11455008</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">許栢瑜</span>
+                        <span class="member-id">S11455044</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">2</div>
+                <div class="project-title">翻牌記憶小遊戲</div>
+                <div class="project-description">通過翻開卡片，去配對相同的圖案，並計時計分，來測試並訓練自己的記憶力</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">鄭承逸</span>
+                        <span class="member-id">S11455015</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">陳奕璋</span>
+                        <span class="member-id">S11455019</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">3</div>
+                <div class="project-title">Riot-go</div>
+                <div class="project-description">訓練手眼協調能力以提高反應能力，從有意識動作化為下意識反應</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">陳宥霖</span>
+                        <span class="member-id">S11455054</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">盧柏翰</span>
+                        <span class="member-id">S11455053</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">鄭宇真</span>
+                        <span class="member-id">11455022</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">4</div>
+                <div class="project-title">2D平面射擊遊戲</div>
+                <div class="project-description">以經典遊戲小蜜蜂為參考，你需要操控主角去擊敗小兵，挑戰更高難度的boss關</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">陳翊丞</span>
+                        <span class="member-id">S11455020</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">林禹樂</span>
+                        <span class="member-id">S1145025</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">黃詠堯</span>
+                        <span class="member-id">S11355016</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">5</div>
+                <div class="project-title">吃飯不揪</div>
+                <div class="project-description">分成使用方和統計方，使用方可以選擇便當品項，統計方可以看到每個人的便當品項、登記是否交錢。</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">楊喬欣</span>
+                        <span class="member-id">S11455037</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">莊亞潔</span>
+                        <span class="member-id">S11455002</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">蔡承勳</span>
+                        <span class="member-id">S11455016</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">6</div>
+                <div class="project-title">pass pass</div>
+                <div class="project-description">篩選過期食品（透過分類搜尋食品期限，以及設定快過期的食品）</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">李鎂辰</span>
+                        <span class="member-id">s11455049</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">邱怡恩</span>
+                        <span class="member-id">s11455038</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">李惠褕</span>
+                        <span class="member-id">s11455009</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">7</div>
+                <div class="project-title">月底救星</div>
+                <div class="project-description">幫助月底快要沒錢的人尋找附近便宜的美食!如果不知道要吃甚麼，可以使用「今天吃甚麼」轉盤，也可以在各商家看到菜單、價錢、評價以及近期優惠等資訊。</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">邱才毓</span>
+                        <span class="member-id">S11455050</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">黃郁軒</span>
+                        <span class="member-id">S11455042</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">宋婕柔</span>
+                        <span class="member-id">S11055043</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">8</div>
+                <div class="project-title">蜜桃RPG</div>
+                <div class="project-description">一顆水蜜桃的逃生行動：3
+可以收集各種結局，內建存檔功能不用每次都從頭開始，直接讀檔從死掉的地方重來。</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">劉宛甄</span>
+                        <span class="member-id">S11455043</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">林晏婯</span>
+                        <span class="member-id">S11455048</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">陳筠蓁</span>
+                        <span class="member-id">S11455031</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">9</div>
+                <div class="project-title">合成遊戲</div>
+                <div class="project-description">隨機掉落合成消除</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">連紘陞</span>
+                        <span class="member-id">s11455026</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">林宸佑</span>
+                        <span class="member-id">S11455011</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">10</div>
+                <div class="project-title">心情偵探社</div>
+                <div class="project-description">提供學生有關校園生活情境題，可以在互動式的介面上進行決策選擇，系統會依照選擇的決策給予簡短適當的回饋，讓學生進入下一個不同的情境畫面（以此類推），最後系統會依據學生一系列的選擇給予一個有趣的 RPG 角色稱號，透過這個互動式小遊戲，協助學生在生活中處理情緒、人際互動的能力（符應現在所推動的SEL教育）。</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">徐翊玲</span>
+                        <span class="member-id">M11209003</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">廖沛愉</span>
+                        <span class="member-id">M11455016</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">11</div>
+                <div class="project-title">方便記帳</div>
+                <div class="project-description">提供單人與多人記帳的功能，能夠讓人在上面記帳，多人記帳是能夠讓活動時採購的人能夠直接登記購買紀錄在上面，不用像大部分活動的總務讓大家在群組打字最後還要紀錄統計，減少單人的工作量</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">李承翰</span>
+                        <span class="member-id">s11455023</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">鄭至佑</span>
+                        <span class="member-id">s11455029</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">12</div>
+                <div class="project-title">捕風追影</div>
+                <div class="project-description">本系統主要用來記錄使用者看過的電影或影集，讓每一次的觀影都能留下清楚的紀錄。使用者可以輸入片名、評分、觀看時間，並撰寫簡單的心得或備註，系統也會自動加上時間戳記，方便日後查詢。為了讓紀錄更完整，我們加入上傳照片的功能，例如海報或喜歡的場景圖片，讓收藏更具視覺效果。
+此外，系統提供分享功能，使用者能將某部作品的心得頁面分享給朋友，方便推薦或交流。整體功能簡單易用，能快速整理、保存並回顧自己的觀影紀錄。</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">蔡姿芸</span>
+                        <span class="member-id">S11455004</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">張昭文</span>
+                        <span class="member-id">S11455051</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">13</div>
+                <div class="project-title">出遊輕鬆Go</div>
+                <div class="project-description">讓一群分散在各地的好友快速決定出出遊日期、地點、行程，以及計算出遊過程中之每人平均負擔費用</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">韋姵伃</span>
+                        <span class="member-id">S11455021</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">潘宜埩</span>
+                        <span class="member-id">S11455006</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">紀諮霖</span>
+                        <span class="member-id">S11455030</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">14</div>
+                <div class="project-title">debuugo屋屋</div>
+                <div class="project-description">多人線上桌遊，致敬山中小屋機制，主要遊戲進程以試算表紀錄玩家屬性，並設定地圖及發生事件，整個地圖以不同的種類以及透過玩家自主的移動及抉擇改變遊戲的結局及模式，玩家以3~6人為限，遊戲中玩家可隨時通過狀態確認其他玩家屬性及狀態來制訂戰略，時常約為40~60分鐘，為較長時間的桌上遊戲，為多結局的劇情取向，故能通過個人特別操作改變遊戲走向，以自己的方式成為山中小屋的探險王吧!?</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">黃唯鈞</span>
+                        <span class="member-id">S11455028</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">李宇翔</span>
+                        <span class="member-id">S11455012</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">張峻豪</span>
+                        <span class="member-id">S11455003</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">15</div>
+                <div class="project-title">合成大水母</div>
+                <div class="project-description">合成大水母是一款休閒合成類遊戲，玩家把場上隨機掉落的小水母拖曳、合成成更大的水母。每兩隻同種類的水母碰在一起，就會變成一種新的品種。隨著水母越長越大，需要合成減少空間，但畫面仍然會越來越擠、直到瓶子滿了就結束。遊戲目標就是在有限空間裡拿到最高分。</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">尋亭榕</span>
+                        <span class="member-id">S11455013</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">馬裕盈</span>
+                        <span class="member-id">S11455046</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">陳品伃</span>
+                        <span class="member-id">S11455039</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">16</div>
+                <div class="project-title">簡易活動報名與名單管理系統</div>
+                <div class="project-description">此專題提供前台報名與後台資料管理兩大部分，使用者可於前台提交報名資訊，並由後台進行完整的操作。</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">黃鈞豊</span>
+                        <span class="member-id">S11455018</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">蘇子尹</span>
+                        <span class="member-id">S11455017</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">葉祐丞</span>
+                        <span class="member-id">S11455007</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">17</div>
+                <div class="project-title">台南新生指南 Tainan Freshman Guide</div>
+                <div class="project-description">製作一個多功能網站 可以解決新生或是外地人出來炸到台南所面臨到的問題 諸如套房出租、平價美食</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">江鎧安</span>
+                        <span class="member-id">S11455034</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">吳國瑋</span>
+                        <span class="member-id">S11455014</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">施佑穎</span>
+                        <span class="member-id">S11455045</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="order-badge">18</div>
+                <div class="project-title">台灣方塊（TaiwanTetris）</div>
+                <div class="project-description">一個單人的網頁版，具有台灣特色元素的俄羅斯方塊，可以輸入不同玩家姓名並遊玩，會有排行榜（全球同步）</div>
+                <div class="members-section">
+                    <div class="members-title">組員名單</div>
+                    <div class="member-item">
+                        <span class="member-name">陳璟𧛟</span>
+                        <span class="member-id">s11355010</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">馬念</span>
+                        <span class="member-id">Ｓ11455010</span>
+                    </div>
+                    <div class="member-item">
+                        <span class="member-name">胡文融</span>
+                        <span class="member-id">s11455005</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🎲 報告順序由系統隨機產生</p>
+            <p>祝各組報告順利！💪</p>
+        </div>
+    </div>
+</body>
+</html>
