@@ -131,15 +131,41 @@
             font-size: 1.1em;
         }
 
-        /* 專題卡片 */
-        .section-title {
+        /* 梯次區域 */
+        .batch-section {
+            margin-bottom: 60px;
+        }
+
+        .batch-header {
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
             text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .batch-title {
             color: white;
-            font-size: 2em;
-            margin: 50px 0 30px 0;
+            font-size: 2.2em;
+            margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
+        .batch-date {
+            color: rgba(255,255,255,0.95);
+            font-size: 1.4em;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .batch-info {
+            color: rgba(255,255,255,0.85);
+            font-size: 1.1em;
+        }
+
+        /* 專題卡片 */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -259,6 +285,14 @@
             .unregistered-list {
                 grid-template-columns: 1fr;
             }
+
+            .batch-title {
+                font-size: 1.8em;
+            }
+
+            .batch-date {
+                font-size: 1.2em;
+            }
         }
 
         .footer {
@@ -267,6 +301,13 @@
             margin-top: 50px;
             padding: 20px;
             opacity: 0.8;
+        }
+
+        /* 分隔線 */
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            margin: 50px 0;
         }
     </style>
 </head>
@@ -283,7 +324,7 @@
                 <h2>尚未登記專題的學生</h2>
             </div>
             <div class="unregistered-notice">
-                以下 <strong>學生</strong> 尚未登記專題，請趕緊提供分組資料(加入2人組或組新組)！
+                 <strong>以下同學</strong> 尚未登記專題，請趕緊提供分組資料(加入2人組或組新組)
             </div>
             <div class="unregistered-list">
                 <div class="unregistered-item">
@@ -310,13 +351,18 @@
         </div>
 
         <div class="stats">
-            📊 共有 <strong>18</strong> 個專題組別 · <strong>48</strong> 位學生已登記
+            📊 共有 <strong>18</strong> 個專題組別 · <strong>48</strong> 位學生已登記 · 分為 <strong>2</strong> 梯次報告
         </div>
 
-        <!-- 專題報告順序區 -->
-        <div class="section-title">📋 專題報告順序</div>
-        
-        <div class="cards-grid">
+        <!-- 第一梯次 -->
+        <div class="batch-section">
+            <div class="batch-header">
+                <div class="batch-title">📅 第一梯次報告</div>
+                <div class="batch-date">12月19日 (星期五)</div>
+                <div class="batch-info">報告順序：第 1-8 組</div>
+            </div>
+            
+            <div class="cards-grid">
             <div class="project-card">
                 <div class="order-badge">1</div>
                 <div class="project-title">自訂</div>
@@ -477,7 +523,20 @@
                     </div>
                 </div>
             </div>
+            </div>
+        </div>
 
+        <div class="divider"></div>
+
+        <!-- 第二梯次 -->
+        <div class="batch-section">
+            <div class="batch-header">
+                <div class="batch-title">📅 第二梯次報告</div>
+                <div class="batch-date">12月26日 (星期五)</div>
+                <div class="batch-info">報告順序：第 9-18 組</div>
+            </div>
+            
+            <div class="cards-grid">
             <div class="project-card">
                 <div class="order-badge">9</div>
                 <div class="project-title">合成遊戲</div>
@@ -671,6 +730,7 @@
                         <span class="member-id">s11455005</span>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
 
