@@ -140,6 +140,23 @@
       min-height: 120px;
     }
 
+    select.form-input {
+      background: white;
+      cursor: pointer;
+    }
+
+    select.form-input:disabled {
+      background: #f4f6f7;
+      color: #7f8c8d;
+      cursor: not-allowed;
+    }
+
+    .form-hint {
+      margin-top: 6px;
+      color: #7f8c8d;
+      font-size: 12px;
+    }
+
     .members-container {
       background: #f8f9fa;
       padding: 20px;
@@ -377,6 +394,7 @@
     }
 
     .empty-state {
+      grid-column: 1 / -1;
       text-align: center;
       padding: 60px 20px;
       color: #95a5a6;
@@ -728,6 +746,12 @@
           </div>
 
           <div class="form-group">
+            <label class="form-label" for="preferredWeek">希望報告週次</label>
+            <select class="form-input" id="preferredWeek"></select>
+            <div class="form-hint" id="preferredWeekHint"></div>
+          </div>
+
+          <div class="form-group">
             <label class="form-label">
               修改密碼<span class="required">*</span>
             </label>
@@ -821,6 +845,12 @@
             <div class="members-container" id="editMembersContainer"></div>
           </div>
 
+          <div class="form-group">
+            <label class="form-label" for="editPreferredWeek">希望報告週次</label>
+            <select class="form-input" id="editPreferredWeek"></select>
+            <div class="form-hint" id="editPreferredWeekHint"></div>
+          </div>
+
           <div class="btn-container">
             <button type="submit" class="btn btn-primary">
               ✅ 儲存修改
@@ -853,8 +883,11 @@
     // TODO: 請將下方的網址改為您的 Apps Script Web App URL
     const API_URL = 'https://script.google.com/macros/s/AKfycbzLfftUlP0lMI7MPH9nkajSCYbaCwXHlKMtkhQg-YQqwXI2p-cI5ZVXXh1I3u2Q0CzUvQ/exec';
     // 格式範例: 'https://script.google.com/macros/s/AKfycbxxx.../exec'
-    
+
     // ========================================================================
+
+    const WEEK_DEFAULT = '皆可';
+    const WEEK_OPTIONS = [WEEK_DEFAULT, '第1週(12/03)', '第2週(12/10)', '第3週(12/17)', '第4週(12/24)'];
 
     let allProjects = [];
     let currentEditProjectId = null;
@@ -976,6 +1009,30 @@
       });
     });
 
+    // 希望報告週次
+    function syncWeekSelect(selectId, memberCount) {
+      const select = document.getElementById(selectId);
+      const canChoose = memberCount === 3;
+
+      select.disabled = !canChoose;
+      if (!canChoose) {
+        select.value = WEEK_DEFAULT;
+      }
+      document.getElementById(selectId + 'Hint').textContent = canChoose
+        ? '可選擇一個希望報告的週次'
+        : '3 人組才可選擇週次，2 人組固定為皆可';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      ['preferredWeek', 'editPreferredWeek'].forEach(selectId => {
+        const select = document.getElementById(selectId);
+        WEEK_OPTIONS.forEach(week => {
+          select.add(new Option(week === WEEK_DEFAULT ? '皆可(預設)' : week, week));
+        });
+      });
+      syncWeekSelect('preferredWeek', 2);
+    });
+
     // 成員管理
     function addMember() {
       const container = document.getElementById('membersContainer');
@@ -1007,6 +1064,7 @@
       `;
 
       container.appendChild(memberItem);
+      syncWeekSelect('preferredWeek', memberCount + 1);
 
       if (memberCount + 1 >= 3) {
         document.getElementById('addMemberBtn').disabled = true;
@@ -1027,6 +1085,7 @@
       const addBtn = document.getElementById('addMemberBtn');
       addBtn.disabled = false;
       addBtn.textContent = `➕ 新增第 ${members.length + 1} 位成員`;
+      syncWeekSelect('preferredWeek', members.length);
     }
 
     // 表單送出
@@ -1078,9 +1137,10 @@
           projectName,
           description,
           members,
-          password
+          password,
+          preferredWeek: document.getElementById('preferredWeek').value
         });
-        
+
         submitBtn.disabled = false;
         submitBtn.textContent = '✅ 送出登記';
 
@@ -1096,6 +1156,7 @@
             document.getElementById('addMemberBtn').disabled = false;
             document.getElementById('addMemberBtn').textContent = '➕ 新增第 3 位成員';
           }
+          syncWeekSelect('preferredWeek', 2);
         } else {
           showToast(result.message, 'error');
         }
@@ -1128,11 +1189,12 @@
       grid.innerHTML = '';
 
       if (projects.length === 0) {
+        const noData = allProjects.length === 0;
         grid.innerHTML = `
           <div class="empty-state">
             <div class="empty-state-icon">📭</div>
-            <div class="empty-state-text">尚無專題資料</div>
-            <div class="empty-state-subtext">請先到登記頁面新增專題</div>
+            <div class="empty-state-text">${noData ? '尚無專題資料' : '找不到符合的專題'}</div>
+            <div class="empty-state-subtext">${noData ? '請先到登記頁面新增專題' : '請換個關鍵字再試一次'}</div>
           </div>
         `;
         return;
@@ -1147,6 +1209,9 @@
           <div class="project-title">${escapeHtml(project.projectName)}</div>
           <div class="project-info">
             <strong>登記時間：</strong>${project.registerTime}
+          </div>
+          <div class="project-info">
+            <strong>希望報告週次：</strong>${escapeHtml(project.preferredWeek || WEEK_DEFAULT)}
           </div>
           <div class="project-members">${escapeHtml(memberNames)}</div>
           <div class="project-description">${escapeHtml(project.description)}</div>
@@ -1169,9 +1234,10 @@
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
       
       const filtered = allProjects.filter(project => {
-        const nameMatch = project.projectName.toLowerCase().includes(searchTerm);
-        const memberMatch = project.members.some(m => 
-          m.name.toLowerCase().includes(searchTerm)
+        // Google Sheet 會把純數字內容回傳為 number
+        const nameMatch = String(project.projectName).toLowerCase().includes(searchTerm);
+        const memberMatch = project.members.some(m =>
+          String(m.name).toLowerCase().includes(searchTerm)
         );
         return nameMatch || memberMatch;
       });
@@ -1216,8 +1282,8 @@
         const data = result.data;
         document.getElementById('editProjectName').value = data.projectName;
         document.getElementById('editDescription').value = data.description;
-        document.getElementById('editProjectNameCount').textContent = data.projectName.length + '/50';
-        document.getElementById('editDescriptionCount').textContent = data.description.length + '/500';
+        document.getElementById('editProjectNameCount').textContent = String(data.projectName).length + '/50';
+        document.getElementById('editDescriptionCount').textContent = String(data.description).length + '/500';
 
         const container = document.getElementById('editMembersContainer');
         container.innerHTML = '';
@@ -1239,6 +1305,10 @@
           `;
           container.appendChild(memberItem);
         });
+
+        document.getElementById('editPreferredWeek').value =
+          WEEK_OPTIONS.includes(data.preferredWeek) ? data.preferredWeek : WEEK_DEFAULT;
+        syncWeekSelect('editPreferredWeek', data.members.length);
 
         document.getElementById('editForm').style.display = 'block';
 
@@ -1280,7 +1350,8 @@
           formData: {
             projectName,
             description,
-            members
+            members,
+            preferredWeek: document.getElementById('editPreferredWeek').value
           }
         });
         
@@ -1323,6 +1394,11 @@
             <div style="color: #2C3E50;">${project.lastModified}</div>
           </div>
           ` : ''}
+
+          <div style="margin-bottom: 20px;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">希望報告週次</div>
+            <div style="color: #2C3E50;">${escapeHtml(project.preferredWeek || WEEK_DEFAULT)}</div>
+          </div>
 
           <div style="margin-bottom: 20px;">
             <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 10px;">成員資料</div>
