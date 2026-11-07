@@ -918,6 +918,9 @@
       
       if (result.success) {
         sessionStorage.setItem('systemAuthenticated', 'true');
+        if (result.accessToken) {
+          sessionStorage.setItem('accessToken', result.accessToken);
+        }
         errorDiv.style.color = '#27ae60';
         errorDiv.textContent = '✅ 驗證成功！正在進入系統...';
         
@@ -937,6 +940,28 @@
     function showMainSystem() {
       document.getElementById('accessGuard').style.display = 'none';
       document.getElementById('mainContainer').style.display = 'block';
+      if (document.getElementById('query-tab').classList.contains('active')) {
+        loadProjects();
+      }
+    }
+
+    function showAccessGuard(message) {
+      sessionStorage.removeItem('systemAuthenticated');
+      sessionStorage.removeItem('accessToken');
+      closeEditModal();
+      closeDetailModal();
+
+      const btn = document.getElementById('accessBtn');
+      btn.disabled = false;
+      btn.textContent = '🔓 進入系統';
+
+      const errorDiv = document.getElementById('accessError');
+      errorDiv.style.color = '#e74c3c';
+      errorDiv.textContent = message;
+
+      document.getElementById('accessPasswordInput').value = '';
+      document.getElementById('mainContainer').style.display = 'none';
+      document.getElementById('accessGuard').style.display = 'flex';
     }
     // ⭐ 通關密碼功能結束
 	
@@ -948,10 +973,9 @@
         // ⭐ 將 action 和所有資料都放在 POST body 中
         const requestBody = {
           action: action,
+          accessToken: sessionStorage.getItem('accessToken'),
           ...additionalData
         };
-
-        console.log('發送請求:', action, requestBody);
 
         const response = await fetch(API_URL, {  // ⭐ URL 不加參數
           method: 'POST',
@@ -966,7 +990,9 @@
         }
 
         const result = await response.json();
-        console.log('收到回應:', result);
+        if (result.authRequired) {
+          showAccessGuard(result.message);
+        }
         
         return result;
         
@@ -1437,7 +1463,8 @@
     function escapeHtml(text) {
       const div = document.createElement('div');
       div.textContent = text;
-      return div.innerHTML;
+      // innerHTML 不會跳脫引號，而此結果也會放進 HTML 屬性值
+      return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     // 點擊 Modal 外部關閉
