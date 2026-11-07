@@ -843,6 +843,7 @@
           <div class="form-group">
             <label class="form-label">成員資料</label>
             <div class="members-container" id="editMembersContainer"></div>
+            <button type="button" class="add-member-btn" id="editAddMemberBtn" onclick="addEditMember()"></button>
           </div>
 
           <div class="form-group">
@@ -993,7 +994,7 @@
         if (result.authRequired) {
           showAccessGuard(result.message);
         }
-        
+
         return result;
         
       } catch (error) {
@@ -1286,6 +1287,52 @@
       currentEditProjectId = null;
     }
 
+    function createEditMemberItem(name = '', studentId = '') {
+      const memberItem = document.createElement('div');
+      memberItem.className = 'member-item';
+      memberItem.innerHTML = `
+        <div class="member-header">
+          <div class="member-title"></div>
+          <button type="button" class="member-remove" onclick="removeEditMember(this)">
+            ✕ 移除
+          </button>
+        </div>
+        <div class="member-fields">
+          <div>
+            <input type="text" class="form-input member-name" placeholder="姓名" value="${escapeHtml(name)}" required>
+          </div>
+          <div>
+            <input type="text" class="form-input member-id" placeholder="學號" value="${escapeHtml(studentId)}" required>
+          </div>
+        </div>
+      `;
+      return memberItem;
+    }
+
+    function syncEditMembers() {
+      const members = document.querySelectorAll('#editMembersContainer .member-item');
+      members.forEach((item, index) => {
+        item.querySelector('.member-title').textContent = `成員 ${index + 1}`;
+        item.querySelector('.member-remove').style.display = members.length > 2 ? '' : 'none';
+      });
+
+      const addBtn = document.getElementById('editAddMemberBtn');
+      addBtn.disabled = members.length >= 3;
+      addBtn.textContent = members.length >= 3 ? '已達成員上限' : `➕ 新增第 ${members.length + 1} 位成員`;
+      syncWeekSelect('editPreferredWeek', members.length);
+    }
+
+    function addEditMember() {
+      const container = document.getElementById('editMembersContainer');
+      container.appendChild(createEditMemberItem());
+      syncEditMembers();
+    }
+
+    function removeEditMember(btn) {
+      btn.closest('.member-item').remove();
+      syncEditMembers();
+    }
+
     async function verifyEditPassword() {
       const password = document.getElementById('verifyPassword').value;
       const projectId = currentEditProjectId;
@@ -1313,28 +1360,13 @@
 
         const container = document.getElementById('editMembersContainer');
         container.innerHTML = '';
-        data.members.forEach((member, index) => {
-          const memberItem = document.createElement('div');
-          memberItem.className = 'member-item';
-          memberItem.innerHTML = `
-            <div class="member-header">
-              <div class="member-title">成員 ${index + 1}</div>
-            </div>
-            <div class="member-fields">
-              <div>
-                <input type="text" class="form-input member-name" value="${escapeHtml(member.name)}" required>
-              </div>
-              <div>
-                <input type="text" class="form-input member-id" value="${escapeHtml(member.studentId)}" required>
-              </div>
-            </div>
-          `;
-          container.appendChild(memberItem);
+        data.members.forEach(member => {
+          container.appendChild(createEditMemberItem(member.name, member.studentId));
         });
 
         document.getElementById('editPreferredWeek').value =
           WEEK_OPTIONS.includes(data.preferredWeek) ? data.preferredWeek : WEEK_DEFAULT;
-        syncWeekSelect('editPreferredWeek', data.members.length);
+        syncEditMembers();
 
         document.getElementById('editForm').style.display = 'block';
 
